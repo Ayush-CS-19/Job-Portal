@@ -15,6 +15,7 @@ app.use(cookieParser());
 const corsOptions = {
   origin: process.env.FRONTEND_URL,
   credentials: true,
+  methods: "GET,POST,PUT",
 };
 app.use(cors(corsOptions));
 const PORT = process.env.PORT || 5000;
