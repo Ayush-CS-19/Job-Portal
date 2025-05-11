@@ -10,7 +10,6 @@ import serverless from "serverless-http";
 import applicationRoute from "./routes/application.route.js";
 dotenv.config({});
 const app = express();
-export const handler = serverless(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -20,12 +19,13 @@ const corsOptions = {
   methods: "GET,POST,PUT,DELETE,OPTIONS",
 };
 app.use(cors(corsOptions));
-const PORT = process.env.PORT || 5000;
+connectDB();
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server started on port ${PORT}`);
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Internal Server Error" });
 });
+export const handler = serverless(app);
