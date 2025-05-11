@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 import jobRoute from "./routes/job.route.js";
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
-import serverless from "serverless-http";
 import applicationRoute from "./routes/application.route.js";
 
 dotenv.config({});
@@ -41,6 +40,12 @@ const startServer = async () => {
         .status(500)
         .json({ message: "Internal Server Error", error: err.message });
     });
+
+    // Start the server with app.listen
+    const PORT = process.env.PORT || 3000; // Use environment variable or default to 3000
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   } catch (err) {
     console.error("Database connection failed:", err);
     process.exit(1);
@@ -48,5 +53,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-export default serverless(app);
