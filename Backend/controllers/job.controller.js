@@ -67,8 +67,7 @@ export const getAllJob = async (req, res) => {
     // Find jobs with pagination and text search (if keyword is provided)
     const jobs = await Job.find(query)
       .populate({
-        path: "company created_by", // Combined populate call
-        select: "name _id", // Select only required fields to optimize the response
+        path: "company",
       })
       .sort({ createdAt: -1 }) // Sort by createdAt
       .skip(skip) // Pagination skip
