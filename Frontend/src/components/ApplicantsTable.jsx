@@ -71,8 +71,7 @@ export const ApplicantsTable = ({ application }) => {
               </TableCell>
               <TableCell>
                 <Link
-                  to
-                  l={item?.applicants?.profile?.resume}
+                  to={item?.applicants?.profile?.resume}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#2980B9] hover:text-[#A9CCE3] underline transition-colors"
