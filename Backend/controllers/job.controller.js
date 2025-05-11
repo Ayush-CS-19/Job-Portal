@@ -53,32 +53,45 @@ export const postJob = async (req, res) => {
 export const getAllJob = async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
-    const query = {
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-      ],
-    };
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+
+    // Define the pagination skip value
+    const skip = (page - 1) * limit;
+
+    // Query to search using full-text search
+    const query = keyword
+      ? { $text: { $search: keyword } } // Use text search for better performance
+      : {}; // If no keyword, return all jobs
+
+    // Find jobs with pagination and text search (if keyword is provided)
     const jobs = await Job.find(query)
       .populate({
-        path: "company",
+        path: "company created_by", // Combined populate call
+        select: "name _id", // Select only required fields to optimize the response
       })
-      .populate({
-        path: "created_by",
-      })
-      .sort({ createdAt: -1 });
-    if (!jobs) {
+      .sort({ createdAt: -1 }) // Sort by createdAt
+      .skip(skip) // Pagination skip
+      .limit(limit) // Pagination limit
+      .exec();
+
+    if (!jobs || jobs.length === 0) {
       return res.status(404).json({
         message: "Jobs Not Found",
         success: false,
       });
     }
+
     return res.status(200).json({
       jobs,
       success: true,
     });
   } catch (err) {
     console.log(err);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
   }
 };
 export const getJobByID = async (req, res) => {
