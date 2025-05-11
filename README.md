@@ -59,7 +59,7 @@ A full-stack web application designed to connect **job seekers** with **employer
    npm run dev
    ```
 
-4. Open your browser and go to Live : [http://localhost:5173](http://localhost:5173)
+4. Open your browser and go to Live : [https://job-portal-three-ashen.vercel.app/](https://job-portal-three-ashen.vercel.app/)
 
 ---
 
