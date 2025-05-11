@@ -6,16 +6,18 @@ import dotenv from "dotenv";
 import jobRoute from "./routes/job.route.js";
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/company.route.js";
+import serverless from "serverless-http";
 import applicationRoute from "./routes/application.route.js";
 dotenv.config({});
 const app = express();
+export const handler = serverless(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 const corsOptions = {
   origin: process.env.FRONTEND_URL,
   credentials: true,
-  methods: "GET,POST,PUT",
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
 };
 app.use(cors(corsOptions));
 const PORT = process.env.PORT || 5000;
