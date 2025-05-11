@@ -19,13 +19,7 @@ const corsOptions = {
   methods: "GET,POST,PUT,DELETE,OPTIONS",
 };
 app.use(cors(corsOptions));
-let isConnected = false;
-
-async function connectDB() {
-  if (isConnected) return;
-  await mongoose.connect(process.env.MONGO_URI);
-  isConnected = true;
-}
+connectDB();
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
