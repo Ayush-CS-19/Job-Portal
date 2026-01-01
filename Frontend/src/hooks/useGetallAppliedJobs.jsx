@@ -1,31 +1,31 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setAllAdminJobs } from "../redux/jobSlice";
-import { JOBS_API_END_POINT } from "../utils/constants";
+import { setAllAppliedJobs } from "../redux/applicationSlice";
+import { APPLICATION_API_END_POINT } from "../utils/constants";
 
-const useGetallAdminJobs = () => {
+const useGetAllAppliedJobs = () => {
   const dispatch = useDispatch();
   const { searchQuery } = useSelector((store) => store.job);
 
   useEffect(() => {
-    const fetchAllAdminJobs = async () => {
+    const fetchAllAppliedJobs = async () => {
       try {
         const res = await axios.get(
-          `${JOBS_API_END_POINT}/getadmin?keyword=${searchQuery}`,
+          `${APPLICATION_API_END_POINT}/get/jobs?keyword=${searchQuery}`,
           { withCredentials: true }
         );
 
         if (res.data.success) {
-          dispatch(setAllAdminJobs(res.data.jobs));
+          dispatch(setAllAppliedJobs(res.data.applications));
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching applied jobs:", err);
       }
     };
 
-    fetchAllAdminJobs();
-  }, [dispatch, searchQuery]); // ✅ IMPORTANT
+    fetchAllAppliedJobs();
+  }, [dispatch, searchQuery]); 
 };
 
-export default useGetallAdminJobs;
+export default useGetAllAppliedJobs;
