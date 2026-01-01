@@ -1,23 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
-const companySlice = createSlice({
-  name: "company",
-  initialState: {
-    singleCompany: null,
-    companies: [],
-    searchCompany: "",
-  },
+
+const initialState = {
+  loading: false,
+  user: null,
+  isAuthenticated: false,
+};
+
+const authSlice = createSlice({
+  name: "auth",
+  initialState,
   reducers: {
-    setSingleCompany: (state, action) => {
-      state.singleCompany = action.payload;
+    setLoading: (state, action) => {
+      state.loading = action.payload;
     },
-    setCompanies: (state, action) => {
-      state.companies = action.payload;
+
+    loginSuccess: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+
+      // 🔒 PRIVATE LOGIN
+      sessionStorage.setItem("user", JSON.stringify(action.payload));
     },
-    setSearchCompanyby: (state, action) => {
-      state.searchCompany = action.payload;
+
+    logout: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      sessionStorage.clear();
     },
   },
 });
-export const { setSingleCompany, setCompanies, setSearchCompanyby } =
-  companySlice.actions;
-export default companySlice.reducer;
+
+export const { setLoading, loginSuccess, logout } = authSlice.actions;
+export default authSlice.reducer;
