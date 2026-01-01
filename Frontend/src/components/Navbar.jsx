@@ -3,31 +3,32 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import axios from "axios";
 import { toast } from "sonner";
-import { setUser } from "../redux/authSlice";
+import { logout } from "../redux/authSlice";
 import { USER_API_END_POINT } from "../utils/constants";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { LogOut, User2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { persistor } from "../redux/store";
 
 const Navbar = () => {
-  const { user } = useSelector((store) => store.auth);
+  const { user, isAuthenticated } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const logOuthandler = async () => {
     try {
-      const res = await axios.get(`${USER_API_END_POINT}/logout`, {
+      await axios.get(`${USER_API_END_POINT}/logout`, {
         withCredentials: true,
       });
-      if (res.data.success) {
-        dispatch(setUser(null));
-        navigate("/");
-        toast.success(res.data.message);
-      }
+
+      dispatch(logout());
+      persistor.purge(); 
+      toast.success("Logged out successfully");
+      navigate("/login", { replace: true });
     } catch (err) {
-      console.log(err);
-      toast.error(err.response.data.message);
+      toast.error("Logout failed");
+      console.error(err);
     }
   };
 
@@ -35,142 +36,81 @@ const Navbar = () => {
     <div className="relative bg-[#F5F7FA] shadow-md">
       <div className="flex items-center justify-between mx-auto max-w-7xl h-16 px-4">
         {/* Logo */}
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            <Link to="/" className="text-[#2C3E50]">
-              Jobs{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2980B9] to-[#A9CCE3]">
-                Portal
-              </span>
-            </Link>
-          </h1>
-        </div>
+        <h1 className="text-3xl font-extrabold">
+          <Link to="/" className="text-[#2C3E50]">
+            Jobs{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2980B9] to-[#A9CCE3]">
+              Portal
+            </span>
+          </Link>
+        </h1>
 
-        {/* Navigation Links and User Actions */}
+        {/* Navigation */}
         <div className="flex items-center gap-8">
-          {/* Navigation Links */}
-          <ul className="flex font-semibold items-center gap-6 text-[#2C3E50]">
-            {user && user.role === "recruiter" ? (
+          <ul className="flex font-semibold gap-6">
+            {isAuthenticated && user?.role === "recruiter" ? (
               <>
-                <li>
-                  <Link
-                    to="/admin/companies"
-                    className="relative text-sm uppercase tracking-wide hover:text-[#2980B9] transition-colors duration-300 after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#2980B9] after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    Companies
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/jobs"
-                    className="relative text-sm uppercase tracking-wide hover:text-[#2980B9] transition-colors duration-300 after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#2980B9] after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    Jobs
-                  </Link>
-                </li>
+                <li><Link to="/admin/companies">Companies</Link></li>
+                <li><Link to="/admin/jobs">Jobs</Link></li>
               </>
             ) : (
               <>
-                <li>
-                  <Link
-                    to="/"
-                    className="relative text-sm uppercase tracking-wide hover:text-[#2980B9] transition-colors duration-300 after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#2980B9] after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/jobs"
-                    className="relative text-sm uppercase tracking-wide hover:text-[#2980B9] transition-colors duration-300 after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#2980B9] after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    Jobs
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/browse"
-                    className="relative text-sm uppercase tracking-wide hover:text-[#2980B9] transition-colors duration-300 after:content-[''] after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-[#2980B9] after:transition-all after:duration-300 hover:after:w-full"
-                  >
-                    Browse
-                  </Link>
-                </li>
+                <li><Link to="/">Home</Link></li>
+                <li><Link to="/jobs">Jobs</Link></li>
+                <li><Link to="/browse">Browse</Link></li>
               </>
             )}
           </ul>
 
-          {/* User Actions */}
-          {!user ? (
-            <div className="flex items-center gap-3">
+          {/* Auth Actions */}
+          {!isAuthenticated ? (
+            <div className="flex gap-3">
               <Link to="/login">
-                <Button
-                  variant="outline"
-                  className="border-[#A9CCE3] text-[#2C3E50] hover:bg-[#A9CCE3]/20 hover:text-[#2980B9] transition-all duration-300"
-                >
-                  Login
-                </Button>
+                <Button variant="outline">Login</Button>
               </Link>
               <Link to="/signup">
-                <Button className="bg-gradient-to-r from-[#2980B9] to-[#A9CCE3] hover:from-[#1B6A99] hover:to-[#8BB8D8] transition-all duration-300">
-                  Sign Up
-                </Button>
+                <Button>Sign Up</Button>
               </Link>
             </div>
           ) : (
             <Popover>
               <PopoverTrigger asChild>
-                <Avatar className="cursor-pointer ring-2 ring-[#A9CCE3]/50 hover:ring-[#2980B9] transition-all duration-300">
-                  <AvatarImage
-                    src={user?.profile?.profilePhoto}
-                    alt={user?.name}
-                  />
-                  <AvatarFallback className="bg-[#A9CCE3] text-[#2C3E50]">
+                <Avatar className="cursor-pointer">
+                  <AvatarImage src={user?.profile?.profilePhoto} />
+                  <AvatarFallback>
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
               </PopoverTrigger>
-              <PopoverContent className="w-80 bg-white border border-[#A9CCE3]/50 rounded-xl shadow-xl">
+
+              <PopoverContent className="w-72">
                 <div className="flex gap-4 p-4">
-                  <Avatar className="ring-2 ring-[#A9CCE3]/50">
-                    <AvatarImage
-                      src={user?.profile?.profilePhoto}
-                      alt={user?.name}
-                    />
-                    <AvatarFallback className="bg-[#A9CCE3] text-[#2C3E50]">
+                  <Avatar>
+                    <AvatarImage src={user?.profile?.profilePhoto} />
+                    <AvatarFallback>
                       {user?.name?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h4 className="font-semibold text-lg text-[#2C3E50]">
-                      {user?.name}
-                    </h4>
-                    <p className="text-sm text-[#2C3E50]/70 truncate">
+                    <h4 className="font-semibold">{user?.name}</h4>
+                    <p className="text-sm text-muted-foreground">
                       {user?.profile?.bio}
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col p-2">
-                  {user && user.role === "student" && (
-                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#A9CCE3]/20 transition-colors duration-300">
-                      <User2 className="h-5 w-5 text-[#2980B9]" />
-                      <Button
-                        variant="ghost"
-                        className="text-[#2C3E50] hover:text-[#2980B9] w-full justify-start"
-                      >
-                        <Link to="/profile">View Profile</Link>
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-[#A9CCE3]/20 transition-colors duration-300">
-                    <LogOut className="h-5 w-5 text-[#2980B9]" />
-                    <Button
-                      onClick={logOuthandler}
-                      variant="ghost"
-                      className="text-[#2C3E50] hover:text-[#2980B9] w-full justify-start"
-                    >
-                      Logout
+
+                <div className="flex flex-col gap-2 px-2 pb-2">
+                  {user?.role === "student" && (
+                    <Button variant="ghost" asChild>
+                      <Link to="/profile">
+                        <User2 className="mr-2 h-4 w-4" /> View Profile
+                      </Link>
                     </Button>
-                  </div>
+                  )}
+
+                  <Button variant="ghost" onClick={logOuthandler}>
+                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
